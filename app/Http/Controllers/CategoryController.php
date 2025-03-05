@@ -8,10 +8,20 @@ use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
-    public function index() {
-      return Inertia::render('category/index', [
-        'categories' => Category::all()
-      ]);
+    public function index(Request $request) {
+
+        $query = Category::query();
+
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $categories = $query->paginate(5)->withQueryString(); 
+
+        return Inertia::render('category/index', [
+            'categories' => $categories,
+            'filters' => $request->only('search', 'page'),
+        ]);
     }
 
     public function create() {
